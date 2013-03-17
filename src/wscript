@@ -1,0 +1,21 @@
+def configre(conf):
+    conf.check_cxx(header_name = 'stdint.h')
+    conf.check_cxx(header_name = 'vector')
+
+def build(bld):
+    bld.install_files('${PREFIX}', [
+            'BitArray.hpp'
+            ], relative_trick = True)
+    
+    bld.shlib(
+        source  = ['BitArray.cpp'],
+        target = 'bitarray',
+        name = 'bitarray',
+        includes = '.')
+    
+    bld.program(
+        features = 'gtest',
+        source = ['BitArrayTest.cpp'],
+        use = 'bitarray',
+        includes = '.',
+        target = 'BitArrayTest')
