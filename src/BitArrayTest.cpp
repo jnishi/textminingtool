@@ -3,7 +3,8 @@
 
 TEST(BitArray, initialize){
   uint64_t size = 32;
-  BitArray ba(size);
+  BitArray ba;
+  ba.resize(size);
   
   for(uint64_t i=0;i<size;i++){
     EXPECT_EQ(0LLU, ba.access(i));
@@ -13,92 +14,102 @@ TEST(BitArray, initialize){
 
 TEST(BitArray, setbit){
   uint64_t size = 32;
-  BitArray ba(size);
-  ba.setbit(1,14);
+  BitArray ba;
+  ba.resize(size);
+  ba.setbit(ONE,14);
   EXPECT_EQ(1LLU, ba.access(14));
 
-  ba.setbit(0,14);
+  ba.setbit(ZERO,14);
   EXPECT_EQ(0LLU, ba.access(14));
 
-  ba.setbit(1, 31);
-  ba.setbit(1, 29);
+  ba.setbit(ONE, 31);
+  ba.setbit(ONE, 29);
   EXPECT_EQ(1LLU, ba.access(31));
   EXPECT_EQ(1LLU, ba.access(29));
 
-  ba.setbit(0, 31);
+  ba.setbit(ZERO, 31);
   EXPECT_EQ(0LLU, ba.access(31));
   EXPECT_EQ(1LLU, ba.access(29));
   
 }
 
 TEST(BitArray, length){
-  BitArray ba(35);
-  EXPECT_EQ(35LLU, ba.size());
+  BitArray ba;
+  uint64_t size = 35;
+  ba.resize(size);
+  EXPECT_EQ(size, ba.size());
 }
 
 TEST(BitArray, rank1){
-  BitArray ba(1024);
-  
+  BitArray ba;
+  uint64_t size = 1024;
+  ba.resize(size);
   for(uint64_t i=1;i<1024;i+=2){
-    ba.setbit(1LLU, i);
+    ba.setbit(ONE, i);
   }
   
   ba.build();
-  EXPECT_EQ(1LLU, ba.rank(0,0));
-  EXPECT_EQ(1LLU, ba.rank(1,1));
-  EXPECT_EQ(1LLU, ba.rank(0,1));
-  EXPECT_EQ(2LLU, ba.rank(1,3));
-  EXPECT_EQ(512LLU, ba.rank(1,1023));
+  EXPECT_EQ(1LLU, ba.rank(ZERO,0));
+  EXPECT_EQ(1LLU, ba.rank(ONE,1));
+  EXPECT_EQ(1LLU, ba.rank(ZERO,1));
+  EXPECT_EQ(2LLU, ba.rank(ONE,3));
+  EXPECT_EQ(512LLU, ba.rank(ONE,1023));
   
 }
 
 TEST(BitArray, rank2){
-  BitArray ba(712);
-  
-  ba.setbit(1, 0);
-  ba.setbit(1, 1);
-  ba.setbit(1, 2);
-  ba.setbit(1, 3);
+  BitArray ba;
+  uint64_t size = 1024;
+  ba.resize(size);
+
+  ba.setbit(ONE, 0);
+  ba.setbit(ONE, 1);
+  ba.setbit(ONE, 2);
+  ba.setbit(ONE, 3);
   
   ba.build();
-  EXPECT_EQ(0LLU, ba.rank(0,0));
-  EXPECT_EQ(2LLU, ba.rank(1,1));
-  EXPECT_EQ(1LLU, ba.rank(0,4));
-  EXPECT_EQ(4LLU, ba.rank(1,6));
-  EXPECT_EQ(4LLU, ba.rank(1,124));
+  EXPECT_EQ(0LLU, ba.rank(ZERO,0));
+  EXPECT_EQ(2LLU, ba.rank(ONE,1));
+  EXPECT_EQ(1LLU, ba.rank(ZERO,4));
+  EXPECT_EQ(4LLU, ba.rank(ONE,6));
+  EXPECT_EQ(4LLU, ba.rank(ONE,124));
   
 }
 
 TEST(BitArray, select1){
-  BitArray ba(256);
+  BitArray ba;
+  uint64_t size = 768;
+  ba.resize(size);
 
-  ba.setbit(1, 0);
-  ba.setbit(1, 1);
-  ba.setbit(1, 2);
-  ba.setbit(1, 3);
+  ba.setbit(ONE, 0);
+  ba.setbit(ONE, 1);
+  ba.setbit(ONE, 2);
+  ba.setbit(ONE, 3);
  
   ba.build();
-  EXPECT_EQ(4LLU, ba.select(0,1));
-  EXPECT_EQ(0LLU, ba.select(1,1));
-  EXPECT_EQ(1LLU, ba.select(1,2));
-  EXPECT_EQ(2LLU, ba.select(1,3));
-  EXPECT_EQ(5LLU, ba.select(0,2));
+  EXPECT_EQ(4LLU, ba.select(ZERO,1));
+  EXPECT_EQ(0LLU, ba.select(ONE,1));
+  EXPECT_EQ(1LLU, ba.select(ONE,2));
+  EXPECT_EQ(2LLU, ba.select(ONE,3));
+  EXPECT_EQ(5LLU, ba.select(ZERO,2));
 }
 
 TEST(BitArray, select2){
-  BitArray ba(1024);
+  BitArray ba;
+  uint64_t size = 768;
+  ba.resize(size);
 
-  ba.setbit(1, 0);
-  ba.setbit(1, 1);
-  ba.setbit(1, 2);
-  ba.setbit(1, 3);
+  ba.setbit(ONE, 0);
+  ba.setbit(ONE, 1);
+  ba.setbit(ONE, 2);
+  ba.setbit(ONE, 3);
 
-  ba.setbit(1, 278);
+  ba.setbit(ONE, 278);
  
   ba.build();
-  EXPECT_EQ(277LLU, ba.select(0,274));
-  EXPECT_EQ(279LLU, ba.select(0,275));
-  EXPECT_EQ(278LLU, ba.select(1,5));
-  EXPECT_EQ(2LLU, ba.select(1,3));
-  EXPECT_EQ(5LLU, ba.select(0,2));
+  EXPECT_EQ(277LLU, ba.select(ZERO,274));
+  EXPECT_EQ(279LLU, ba.select(ZERO,275));
+  EXPECT_EQ(278LLU, ba.select(ONE,5));
+  EXPECT_EQ(2LLU, ba.select(ONE,3));
+  EXPECT_EQ(5LLU, ba.select(ZERO,2));
 }

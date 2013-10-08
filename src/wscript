@@ -5,17 +5,19 @@ def configre(conf):
 def build(bld):
     bld.install_files('${PREFIX}', [
             'BitArray.hpp'
+            'WaveletArray.hpp'
             ], relative_trick = True)
     
     bld.shlib(
-        source  = ['BitArray.cpp'],
-        target = 'bitarray',
-        name = 'bitarray',
+        source  = ['BitArray.cpp', 'WaveletArray.cpp'],
+        target = 'textminingtool',
+        name = 'textminingtool',
         includes = '.')
     
     bld.program(
         features = 'gtest',
-        source = ['BitArrayTest.cpp'],
-        use = 'bitarray',
+        source = ['BitArrayTest.cpp', 'WaveletArrayTest.cpp'],
+        use = 'textminingtool',
+        lib = 'iconv',
         includes = '.',
-        target = 'BitArrayTest')
+        target = 'test')

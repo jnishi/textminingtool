@@ -1,7 +1,7 @@
 #include <cassert>
 #include <smmintrin.h>
 #include <algorithm>
-
+#include <iostream>
 #include "BitArray.hpp"
 
 
@@ -9,38 +9,46 @@ inline uint64_t popcount(uint64_t x){
   return _mm_popcnt_u64(x);
 }
 
-BitArray::BitArray(const uint64_t size) : length(size),
-					  isBuild(false)
+BitArray::BitArray() : length(default_size), isBuild(false)
 {
   initBitBlocks();
   initRankTable();
-  
+}
+
+void BitArray::resize(uint64_t size)
+{
+  length = size;
+  initBitBlocks();
+  initRankTable();
+  isBuild = false;
 }
 
 void BitArray::initBitBlocks()
 {
   bit_blocks.resize((length -1 / block_size)+1, 0LLU);
+  std::vector<uint64_t>(bit_blocks).swap(bit_blocks);
 }
 
 void BitArray::initRankTable()
 {
   rank_table.resize((length -1) / (rank_table_blocks * block_size)+1, 0LLU);
+  std::vector<uint64_t>(rank_table).swap(rank_table);
 }
 
-uint64_t BitArray::access(const uint64_t pos) const
+bit_t BitArray::access(const uint64_t pos) const
 {
   assert(pos < length);
   return (bit_blocks[pos / block_size] & 1LLU << (pos % block_size))
-    ? 1 :0 ;
+    ? ONE : ZERO ;
   
 }
 
-void BitArray::setbit(const uint64_t bit, uint64_t pos)
+void BitArray::setbit(const bit_t bit, uint64_t pos)
 {
   assert(pos < length);
   bit_blocks[pos / block_size] = (bit_blocks[pos / block_size]
 				  & (~(1LLU << (pos % block_size)))
-				  | bit << (pos % block_size));
+				  | (uint64_t) bit << (pos % block_size));
   isBuild = false;
   return;
  }
@@ -77,7 +85,7 @@ uint8_t BitArray::calcTableRank(uint64_t tidx, uint64_t idx) const{
   return rank;
 }
 
-uint64_t BitArray::rank(uint64_t bit, uint64_t pos) const
+uint64_t BitArray::rank(bit_t bit, uint64_t pos) const
 {
   assert(isBuild);
   return bit ? rank1(pos) : (pos - rank1(pos)+1);
@@ -89,9 +97,8 @@ uint64_t BitArray::rank1(uint64_t pos) const
   return rank_table[table_page] + calcTableRank(table_page, pos % (rank_table_blocks * block_size));
 }
 
-uint64_t BitArray::select(uint64_t bit, uint64_t idx) const
+uint64_t BitArray::select(bit_t bit, uint64_t idx) const
 {
-  assert(bit < 2);
   uint64_t tidx = binarySearch(bit, idx, 0);
   uint64_t residue = std::min(rank_table_blocks * block_size * tidx, length);
   uint64_t c_rank = bit ? rank_table[tidx] : residue - rank_table[tidx];
@@ -107,7 +114,7 @@ uint64_t BitArray::select(uint64_t bit, uint64_t idx) const
   }
 }
     
-uint64_t BitArray::selectInBlock(uint64_t bit, uint64_t idx, uint64_t c_rank, uint64_t bidx) const
+uint64_t BitArray::selectInBlock(bit_t bit, uint64_t idx, uint64_t c_rank, uint64_t bidx) const
 {
   uint64_t pos = bidx * block_size;
   for(uint64_t i=0;i<block_size;++i){
@@ -116,7 +123,7 @@ uint64_t BitArray::selectInBlock(uint64_t bit, uint64_t idx, uint64_t c_rank, ui
   }
 }
 
-uint64_t BitArray::binarySearch(uint64_t bit, uint64_t idx, uint64_t tidx) const
+uint64_t BitArray::binarySearch(bit_t bit, uint64_t idx, uint64_t tidx) const
 {
   if(rank_table.size() == 1) return 0;
   uint64_t c_rank = bit ?  rank_table[tidx] : std::min(rank_table_blocks * block_size * tidx, length)  - rank_table[tidx];
