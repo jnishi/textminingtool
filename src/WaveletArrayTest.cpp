@@ -10,11 +10,13 @@ void convertToUTF16(char *input, uint16_t *output, size_t length)
   iconv_t cd = iconv_open("UTF-16LE", "UTF-8");
   size_t outbytesleft = BUFSIZ;
 
+  char *output_iconv = (char *)output;
   while(length > 0){
-    size_t result = iconv(cd, &input, &length, &(char *)output, &outbytesleft);
+    size_t result = iconv(cd, &input, &length, &output_iconv, &outbytesleft);
     ASSERT_GE((int) result, 0);
   }
   iconv_close(cd);
+  output = (uint16_t *)output_iconv;
   return;
 }
 
@@ -22,8 +24,9 @@ void convertToUTF8(uint16_t *input, char *output, size_t length)
 {
   iconv_t cd = iconv_open("UTF-8", "UTF-16LE");
   size_t outbytesleft = BUFSIZ;
+  char * input_iconv = (char *)input;
   while(length > 0){
-    size_t result = iconv(cd, &(char *)input, &length, &output, &outbytesleft);
+    size_t result = iconv(cd, &input_iconv, &length, &output, &outbytesleft);
     ASSERT_GE((int) result, 0);
   }
   iconv_close(cd);

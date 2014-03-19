@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <vector>
+#include <boost/serialization/vector.hpp>
 
 enum bit_t {
   ZERO = 0,
@@ -34,6 +35,15 @@ private:
   uint64_t selectInBlock(bit_t bit, uint64_t idx, uint64_t c_rank, uint64_t bidx) const;
   uint64_t binarySearch(bit_t bit, uint64_t idx, uint64_t tidx) const;
   uint64_t rank1(uint64_t pos) const;
+
+  friend class boost::serialization::access;
+  template<class Archive>
+  void serialize(Archive & ar, const unsigned int version){
+    ar & length;
+    ar & isBuild;
+    ar & bit_blocks;
+    ar & rank_table;
+  }
 
 };
 

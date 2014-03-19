@@ -1,4 +1,8 @@
+#include <string>
+#include <fstream>
 #include <gtest/gtest.h>
+#include <boost/archive/text_iarchive.hpp>
+#include <boost/archive/text_oarchive.hpp>
 #include "BitArray.hpp"
 
 TEST(BitArray, initialize){
@@ -47,7 +51,6 @@ TEST(BitArray, rank1){
   for(uint64_t i=1;i<1024;i+=2){
     ba.setbit(ONE, i);
   }
-  
   ba.build();
   EXPECT_EQ(1LLU, ba.rank(ZERO,0));
   EXPECT_EQ(1LLU, ba.rank(ONE,1));
@@ -112,4 +115,33 @@ TEST(BitArray, select2){
   EXPECT_EQ(278LLU, ba.select(ONE,5));
   EXPECT_EQ(2LLU, ba.select(ONE,3));
   EXPECT_EQ(5LLU, ba.select(ZERO,2));
+}
+
+TEST(BitArray, write1){
+  BitArray ba;
+  uint64_t size = 128;
+  ba.resize(size);
+
+  ba.setbit(ONE, 0);
+  ba.setbit(ONE, 1);
+  ba.setbit(ONE, 2);
+
+  ba.build();
+
+  BitArray ba2;
+  std::ofstream ofs("ba.txt");
+  {
+    boost::archive::text_oarchive oa(ofs);
+    oa << ba;
+  }
+
+  {
+    std::ifstream ifs("ba.txt");
+    boost::archive::text_iarchive ia(ifs);
+    ia >> ba2;
+  }
+  EXPECT_EQ(ONE, ba2.access(0));
+  EXPECT_EQ(ONE, ba2.access(1));
+  EXPECT_EQ(ONE, ba2.access(2));
+  EXPECT_EQ(ZERO, ba2.access(3));
 }

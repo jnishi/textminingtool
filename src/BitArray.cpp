@@ -1,12 +1,11 @@
 #include <cassert>
-#include <smmintrin.h>
+//#include <nmmintrin.h>
 #include <algorithm>
-#include <iostream>
 #include "BitArray.hpp"
 
 
 inline uint64_t popcount(uint64_t x){
-  return _mm_popcnt_u64(x);
+  return __builtin_popcountl(x);
 }
 
 BitArray::BitArray() : length(default_size), isBuild(false)
@@ -46,8 +45,8 @@ bit_t BitArray::access(const uint64_t pos) const
 void BitArray::setbit(const bit_t bit, uint64_t pos)
 {
   assert(pos < length);
-  bit_blocks[pos / block_size] = (bit_blocks[pos / block_size]
-				  & (~(1LLU << (pos % block_size)))
+  bit_blocks[pos / block_size] = ((bit_blocks[pos / block_size]
+				  & (~(1LLU << (pos % block_size))))
 				  | (uint64_t) bit << (pos % block_size));
   isBuild = false;
   return;
@@ -70,7 +69,7 @@ void BitArray::buildRankTable()
 uint8_t BitArray::calcTableRank(uint64_t tidx) const{
   uint8_t rank = 0;
   for(uint64_t i=0;i < rank_table_blocks;++i){
-    rank += popcount(bit_blocks[tidx * rank_table_blocks + i]);
+   rank += popcount(bit_blocks[tidx * rank_table_blocks + i]);
   }
   return rank;
 }

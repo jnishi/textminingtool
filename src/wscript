@@ -18,6 +18,6 @@ def build(bld):
         features = 'gtest',
         source = ['BitArrayTest.cpp', 'WaveletArrayTest.cpp'],
         use = 'textminingtool',
-        lib = 'iconv',
+        lib = ['iconv', 'boost_serialization-mt'],
         includes = '.',
         target = 'test')

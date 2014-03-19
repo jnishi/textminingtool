@@ -1,5 +1,4 @@
 #include "WaveletArray.hpp"
-#include <iostream>
 
 inline bit_t getbit(uint16_t c, uint64_t pos)
 {
@@ -66,7 +65,7 @@ void WaveletArray::build_bitarray(uint16_t *strings, uint64_t l)
 void WaveletArray::build_nextstring(uint16_t *strings, uint64_t l)
 {
   uint16_t nextstring[size];
-  nextstring[size] = NULL;
+  nextstring[size] = '\0';
   uint64_t pos=0;
   
   for(uint64_t i=0;i<size;++i){

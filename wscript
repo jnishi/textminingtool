@@ -9,7 +9,6 @@ def options(opt):
 
 def configure(conf):
     conf.load('compiler_cxx unittest_gtest')
-    conf.env.append_value('CXXFLAGS', ['-msse4.2'])
 
 def build(bld):
     bld.recurse(subdirs)
