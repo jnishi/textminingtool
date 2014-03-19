@@ -1,0 +1,23 @@
+def configre(conf):
+    conf.check_cxx(header_name = 'stdint.h')
+    conf.check_cxx(header_name = 'vector')
+
+def build(bld):
+    bld.install_files('${PREFIX}', [
+            'BitArray.hpp'
+            'WaveletArray.hpp'
+            ], relative_trick = True)
+    
+    bld.shlib(
+        source  = ['BitArray.cpp', 'WaveletArray.cpp'],
+        target = 'textminingtool',
+        name = 'textminingtool',
+        includes = '.')
+    
+    bld.program(
+        features = 'gtest',
+        source = ['BitArrayTest.cpp', 'WaveletArrayTest.cpp'],
+        use = 'textminingtool',
+        lib = ['iconv', 'boost_serialization-mt'],
+        includes = '.',
+        target = 'test')
